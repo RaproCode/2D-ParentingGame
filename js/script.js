@@ -1,248 +1,446 @@
-// Intro (Header & Rules of the game)
-
-// Choose player: Male or female
-
+// SET CANVAS GAME
 // create canvas
-var canvas = document.querySelector(".baby-floor");
+var canvas = document.querySelector(".gameFloor");
 // context object to draw things
 var ctx = canvas.getContext("2d");
 
-// Create Characters (Parent, Baby, Diaper, Bottle of Milk, handwash)
+// -------- AUDIO RESSOURCES
 
-class Parent {
-  constructor(img, x) {
-    this.img = img;
-    this.x = x;
-    this.y = 70;
-    this.width = 90;
-    this.height = 90;
-  }
-
-  drawParent() {
-    this.x += 1;
-
-    // if the x is reaching the canvas width
-    if (this.x == canvas.width - 90) {
-      // reset to return OPTION width
-      this.x = 0;
-    }
-    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-  }
-}
-
-// ---------------Parent------------------
-var parentImg = new Image();
-parentImg.src = "./img/ParentTransparent.png";
-
-function drawParent() {
-  ctx.drawImage(parentImg, parentX, parentY, 90, 70);
-}
-// var parentX = 200;
-// var parentY = 100;
-var newParent = new Parent(parentImg, 70);
-
-// ------------baby----------------------
-var babyImg = new Image();
-babyImg.src = "./img/happybaby.png";
-
-function drawBaby() {
-  ctx.drawImage(babyImg, babyX, babyY, 30, 30);
-}
-
-var babyX = 400;
-var babyY = 100;
-
-// --------------baby fall -- gravity -----------------
-// class BabyFall {
-//   constructor() {
-//     this.img = img;
-//     this.width = width;
-//     this.height = height;
-//     this.x = 0;
-//     this.y = 500;
-//     this.speedX = 0;
-//     this.speedY = 0;
-//     this.gravity = 0.05;
-//     this.gravitySpeed = 0;
-//     this.update = function() {
-//       ctx = canvas.context;
-//       ctx.fillRect(this.x, this.y, this.width, this.height);
-//     };
-//     this.newPos = function() {
-//       this.gravitySpeed += this.gravity;
-//       this.x += this.speedX;
-//       this.y += this.speedY + this.gravitySpeed;
-//       this.hitBottom(); // stop the falling when it hit bottom area
-//     };
-//     this.hitBottom = function() {
-//       var rockbottom = canvas.height - this.height;
-//       if (this.y > rockbottom) {
-//         this.y = rockbottom;
-//       }
-//     };
-//     ctx.drawImage(this, img, this.x, this.y, this.width, this.height);
-//   }
-// }
-
-// ---------------- Building class for bottom images option----------
+// CREATE Option to catch
 class Option {
   constructor(img, x) {
     this.img = img;
     this.x = x;
-    this.y = y;
+    this.y = -40;
     this.width = 40;
     this.height = 40;
     this.caught = false;
   }
 
   drawOption() {
-    this.x += 3;
-
-    // if the x is past the canvas width
-    if (this.x >= canvas.width) {
-      // reset to negative OPTION width
-      this.x = -this.width - Math.floor(Math.random() * 400);
+    if (score > 0) {
+      this.y += 2;
+    }
+    // if the y is past the canvas Height
+    if (this.y > canvas.height && this.caught === false) {
+      // reset to negative OPTION height
+      this.y = -this.height - Math.floor(Math.random() * 400);
+      score -= 1; // for score purpose
     }
 
     ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
   }
 }
 
-// -----------------diaper------------------
+// CREATE Icecream
+class IceCream {
+  constructor(img, x) {
+    this.img = img;
+    this.x = x;
+    this.y = -40;
+    this.width = 40;
+    this.height = 40;
+    this.caught = false;
+  }
+  drawIce() {
+    if (score > 0) {
+      this.y += 1;
+    }
+
+    if (this.y > canvas.height && this.caught === false) {
+      this.y = -this.height - Math.floor(Math.random() * 400);
+    }
+    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+  }
+}
+
+// Characters
+var parentImg = new Image();
+parentImg.src = "./img/ParentTransparent.png";
+
+var parentBackImg = new Image();
+parentBackImg.src = "./img/ParentTransparentBack.png";
+
+var babyImg = new Image();
+babyImg.src = "./img/happybaby.png";
+
+// attach the baby to the parent
+
 var diaperImg = new Image();
 diaperImg.src = "./img/diaper.png";
 
 var diaper = new Option(diaperImg, 100);
 var diaper2 = new Option(diaperImg, 250);
 
-// ---------------------milk----------------------
 var milkImg = new Image();
 milkImg.src = "./img/milk.png";
 
 var milk = new Option(milkImg, 350);
 var milk2 = new Option(milkImg, 200);
 
-//-----------------------handwash----------------------
 var handImg = new Image();
 handImg.src = "./img/handwash.png";
 
 var hand = new Option(handImg, 500);
 var hand2 = new Option(handImg, 0);
 
-// ------- put bottom images inline (diaper, milk, hand)--------
+var iceImg = new Image();
+iceImg.src = "./img/icecream.png";
+
+var ice = new IceCream(iceImg, 300);
+var ice2 = new IceCream(iceImg, 100);
+var ice3 = new IceCream(iceImg, 500);
+
+// var stuffCatch = new Image();
+// letterCatch.src = "./img/.png";
+
+var gameoverImg = new Image();
+gameoverImg.src = "./img/gameover.jpg";
+
+var winImg = new Image();
+winImg.src = "./img/win.png";
+
 var objectsArray = [diaper, diaper2, milk, milk2, hand, hand2];
-var objectParent = [newParent];
 
-// console.log(objectParent);
+var iceArray = [ice, ice2, ice3];
 
-// ---------------------drawing loop ----------------(to make the object move)
+// //CREATE EXPLOSION SPRITE
+// // var letterHit = {
+// //   x: 500,
+// //   y: 500,
+// //   width: 150,
+// //   height: 150,
+// //   spriteX: 0,
+// //   spriteY: 103,
+// //   image: letterCatch,
+// //   draw() {
+// //     ctx.drawImage(
+// //       letterCatch,
+// //       this.spriteX,
+// //       this.spriteY,
+// //       this.width,
+// //       this.height,
+// //       this.x,
+// //       this.y,
+// //       this.width,
+// //       this.height
+// //     );
+// //     setInterval(function() {
+// //       letterHit.spriteX += 128;
+// //       if (letterHit.spriteX === 640) {
+// //         letterHit.spriteX = 0;
+// //       }
+// //     }, 1000);
+// //   }
+// // };
 
-drawingLoop();
-function drawingLoop() {
-  ctx.clearRect(0, 0, 700, 500);
+// CREATE PARENT
+var parent = {
+  x: 400,
+  y: canvas.height - 100,
+  width: 90,
+  height: 90,
+  spriteX: 0,
+  spriteY: 450,
+  image: parentImg,
+  walkInterval: null,
+  flashInterval: null,
+  visible: true,
+  draw() {
+    if (this.visible) {
+      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+  },
 
-  drawRectangles();
-  drawBaby();
-  objectsArray.forEach(function(oneOption) {
+  stopWalking() {
+    clearInterval(this.walkInterval);
+    this.walkInterval = null;
+    this.x = 0;
+    this.y = 450;
+  },
+  // to stop parent loop . stop moving
+  startWalking() {
+    if (this.walkInterval) {
+      return;
+    }
+
+    this.walkInterval = setInterval(function() {
+      parent.x += 150;
+      if (parent.x === 600) {
+        parent.x = 0;
+        parent.y += 150;
+        if (parent.y === 800) {
+          parent.y = 0;
+        }
+      }
+    }, 75);
+  },
+
+  parentClick() {
+    var count = 0;
+    this.flashInterval = setInterval(function() {
+      parent.visible = !parent.visible;
+      count++;
+
+      if (count === 6) {
+        clearInterval(parent.flashInterval);
+        parent.visible = true;
+      }
+    }, 150);
+  }
+};
+
+// CREATE Baby
+var baby = {
+  x: 0,
+  y: canvas.height - 235,
+  width: 40,
+  height: 40,
+  image: babyImg,
+  draw() {
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+  }
+};
+
+//CREATE SCORE COUNTER - ERROR
+var score = 5;
+var radius = 60;
+var zoomInterval = null;
+var white = "white";
+
+// var scoreDiv = {
+//   flashInterval: null,
+//   visible: true,
+
+//   scoreZoom() {
+//     var radiusList = [
+//       61,
+//       62,
+//       63,
+//       64,
+//       65,
+//       66,
+//       67,
+//       68,
+//       69,
+//       70,
+//       70,
+//       69,
+//       68,
+//       67,
+//       66,
+//       65,
+//       64,
+//       63,
+//       62,
+//       61,
+//       60
+//     ];
+//     var count = 0;
+//     zoomInterval = setInterval(function() {
+//       radius = radiusList[count];
+//       count++;
+
+//       if (count === radiusList.length) {
+//         clearInterval(zoomInterval);
+//       }
+//     }, 50);
+//   },
+
+//   scoreClick() {
+//     var count = 0;
+//     this.flashInterval = setInterval(function() {
+//       scoreDiv.visible = !scoreDiv.visible;
+//       count++;
+
+//       if (count === 6) {
+//         clearInterval(scoreDiv.flashInterval);
+//         scoreDiv.visible = true;
+//       }
+//     }, 150);
+//   },
+
+//   draw() {
+//     if (this.visible) {
+//       ctx.beginPath();
+//       ctx.arc(canvas.width - 115, 120, radius, 0, 2 * Math.PI);
+//       ctx.lineWidth = 6;
+//       ctx.stroke();
+//       ctx.font = "bold 70px monospace";
+//       ctx.fillStyle = "white";
+//       ctx.textAlign = "center";
+//       ctx.textBaseline = "middle";
+//       ctx.fillText(score, canvas.width - 115, 120);
+//       //change circle color depending on score
+//       if (score > 15) {
+//         ctx.strokeStyle = "#42f462";
+//       } else if (score >= 10) {
+//         ctx.strokeStyle = "#b5f441";
+//       } else if (score > 5) {
+//         ctx.strokeStyle = "white";
+//       } else {
+//         ctx.strokeStyle = red;
+//       }
+
+//       // -----audio depending on score
+// //       if (score <= 0) {
+// //         laughLow.play();
+// //         setTimeout(function() {
+// //           laughLow.pause();
+// //           laughLow.currentTime = 0;
+// //         }, 2000);
+// //       }
+// //       if (score === 10) {
+// //         laugh.play();
+// //         setTimeout(function() {
+// //           laugh.pause();
+// //           laugh.currentTime = 0;
+// //         }, 2000);
+// //       }
+// //       if (score === 15) {
+// //         goodboy.play();
+// //         setTimeout(function() {
+// //           goodboy.pause();
+// //           goodboy.currentTime = 0;
+// //         }, 2500);
+// //       }
+// //       if (score === 20) {
+// //         merry.play();
+// //         setTimeout(function() {
+// //           merry.pause();
+// //           merry.currentTime = 0;
+// //         }, 2000);
+// //       }
+// //       ctx.closePath();
+// //     }
+// //   }
+// // };
+
+// Drawing on Canvas --Erroro
+function drawEverything() {
+  ctx.fillStyle = "lightblue"; //background
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  parent.draw();
+  baby.draw();
+  //scoreDiv.draw();
+
+  if (score <= 0) {
+    var newWidth = canvas.height * 0.64;
+    ctx.drawImage(
+      gameoverImg,
+      canvas.width / 2 - newWidth / 2,
+      100,
+      newWidth,
+      canvas.height * 0.7
+    );
+    ctx.font = "bold 20px monospace";
+    ctx.fillText("Clik SPACE to restart", canvas.width / 2, 70);
+    return;
+  }
+
+  if (score >= 15) {
+    var newWidth = canvas.height * 0.64;
+    ctx.drawImage(
+      winImg,
+      canvas.width / 2 - newWidth / 2,
+      100,
+      newWidth,
+      canvas.height * 0.7
+    );
+    ctx.font = "bold 20px monospace";
+    ctx.fillText("Press SPACE to play again", canvas.width / 2, 70);
+    return;
+  }
+
+  objectsArray.forEach(oneOption => {
     oneOption.drawOption();
+    if (!oneOption.caught && checkCollision(parent, oneOption)) {
+      //If the option has a false value (set by default), and the colission is true,
+      // then its value becomes true so the score only gains 1pt. Otherwise,
+      //the score would change during all the contact duration between parent and the option images.
+      score += 1;
+      oneOption.caught = true;
+
+      if (score === 10 || score === 15) {
+        scoreDiv.scoreZoom();
+      }
+      objectsArray.push(
+        new Option(oneOption.img, Math.floor(Math.random() * canvas.width))
+      ); // A new images from Option is pushed inside [] array so it's never empty.
+    }
   });
-  objectParent.forEach(function(oneParent) {
-    console.log(oneParent);
-
-    oneParent.drawParent();
+  // to make the images from Options disappear after catch by parent
+  objectsArray = objectsArray.filter(oneOption => {
+    return !oneOption.caught;
   });
 
-  // drawCreate();
+  iceArray.forEach(oneIceCream => {
+    oneIceCream.drawIce();
+    if (!oneIceCream.caught && checkCollision(parent, oneIceCream)) {
+      score -= 3;
+      oneIceCream.caught = true;
+      parent.parentClick();
+      scoreDiv.scoreClick();
+    }
+  });
+}
 
-  //checkCrashes();
+// DRAWING LOOP
+function drawingLoop() {
+  ctx.clearRect(0, 0, 800, 600);
+  drawEverything();
 
-  // re-draw the scene
   requestAnimationFrame(function() {
     drawingLoop();
   });
 }
 
-function drawRectangles() {
-  // Drawing rectangles
+drawingLoop();
 
-  ctx.fillStyle = "lightblue";
-
-  ctx.fillRect(0, 0, 700, 500);
-
-  ctx.strokeStyle = "green";
-  ctx.lineWidth = 10;
-
-  ctx.strokeRect(700, 500, 700, 500);
+function checkCollision(a, b) {
+  return (
+    a.y + a.height >= b.y &&
+    a.y <= b.y + b.height &&
+    a.x + a.width >= b.x &&
+    a.x <= b.x + b.width
+  );
 }
 
-// keyboard controller for baby
-document.onkeydown = function() {
-  // console.log("TEST KEY DOWN" + event.keyCode);
-  // console.log(event);
-  // switch (event.keyCode) {
-  //   case 37: // left arrow (check web for keyboard number > keycode.info)
-  // prevents the default behaviour of keyboard presses (scrolling of ↓↑, screen moving up and down)
-  // event.preventDefault();
-  // babyX -= 15;
-  // break;
-  // case 38: // up arrow (check web for keyboard number > keycode.info)
-  // prevents the default behaviour of keyboard presses (scrolling of ↓↑, screen moving up and down)
-  // event.preventDefault();
-  // babyY -= 15;
-  // break;
-  // case 39: // right arrow (check web for keyboard number > keycode.info)
-  // prevents the default behaviour of keyboard presses (scrolling of ↓↑, screen moving up and down)
-  // event.preventDefault();
-  // babyX += 15;
-  // break;
-  // case 40: // down arrow (check web for keyboard number > keycode.info)
-  // prevents the default behaviour of keyboard presses (scrolling of ↓↑, screen moving up and down)
-  // event.preventDefault();
-  // babyY += 15;
-  // break;
-  //}
+// Keyboard controller
+document.onkeydown = function(event) {
+  switch (event.keyCode) {
+    case 32: //Space
+      restart();
+      break;
+  }
+
+  if (score >= 15 || score <= 0) {
+    return;
+  }
+  // parent.startWalking();
+  switch (event.keyCode) {
+    case 37: //<=
+      parent.image = parentBackImg;
+      parent.x -= 20;
+      break;
+
+    case 39: //=>
+      parent.image = parentImg;
+      parent.x += 20;
+      break;
+  }
+};
+document.onkeyup = function() {
+  // parent.stopWalking();
 };
 
-// // ------------------- Collision detection -------------
+function restart() {
+  score = 5;
+  parent.x = 200;
+  parent.y = canvas.height - 100;
+  parent.stopWalking();
 
-// function rectangleCollision(rectA, rectB) {
-//   console.log(rectA, rectB);
-//   return (
-//     rectA.y + rectA.height >= rectB.y &&
-//     rectA.y <= rectB.y + rectB.height &&
-//     rectA.x + rectA.width >= rectB.x &&
-//     rectA.x <= rectB.x + rectB.width
-//   );
-// }
+  iceArray = [ice, ice2, ice3];
 
-// function checkCrashes() {
-//   console.log(allImages);
-//   allImages.forEach(function(oneImage) {
-//     console.log(oneImage);
-//     if (rectangleCollision(baby, oneImage)) {
-//       console.log(baby);
-//       baby.isCrashed = true;
-//       oneImage.isCrashed = true;
-//     }
-//   });
-// }
-
-// class Crash {
-//   drawCrash() {
-//     if (this.iscrashed) {
-//       ctx.fillStyle = "red";
-//     } else {
-//       ctx.fillStyle = "green";
-//     }
-//   }
-// }
-
-// makes the object disappear after get hit by the baby
-
-// Score
-
-// Winner
-
-// loser
-
-// return
+  objectsArray = [diaper, diaper2, milk, milk2, hand, hand2];
+}
