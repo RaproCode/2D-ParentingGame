@@ -57,6 +57,28 @@ class IceCream {
   }
 }
 
+// CREATE BEER as distraction
+class BeerPinte {
+  constructor(img, x) {
+    this.img = img;
+    this.x = x;
+    this.y = -40;
+    this.width = 40;
+    this.height = 40;
+    this.caught = false;
+  }
+  drawBeer() {
+    if (score > 0) {
+      this.y += 1;
+    }
+
+    if (this.y > canvas.height && this.caught === false) {
+      this.y = -this.height - Math.floor(Math.random() * 300);
+    }
+    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+  }
+}
+
 // Characters
 var parentImg = new Image();
 parentImg.src = "./img/ParentTransparent.png";
@@ -86,7 +108,7 @@ var handImg = new Image();
 handImg.src = "./img/handwash.png";
 
 var hand = new Option(handImg, 500);
-var hand2 = new Option(handImg, 0);
+var hand2 = new Option(handImg, 40);
 
 var iceImg = new Image();
 iceImg.src = "./img/icecream.png";
@@ -95,15 +117,22 @@ var ice = new IceCream(iceImg, 300);
 var ice2 = new IceCream(iceImg, 100);
 var ice3 = new IceCream(iceImg, 400);
 
+var beerImg = new Image();
+beerImg.src = "./img/beer.png";
+
+var beer = new BeerPinte(beerImg, 500);
+
 var gameoverImg = new Image();
-gameoverImg.src = "./img/gameover.jpg";
+gameoverImg.src = "./img/Auriagameover.jpeg";
 
 var winImg = new Image();
-winImg.src = "./img/win.jpeg";
+winImg.src = "./img/Auriawin.jpeg";
 
 var objectsArray = [diaper, diaper2, milk, milk2, hand, hand2];
 
 var iceArray = [ice, ice2, ice3];
+
+var beerArray = [beer];
 
 // CREATE PARENT
 var parent = {
@@ -119,10 +148,10 @@ var parent = {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
       ctx.drawImage(
         baby.image,
-        this.x + 5,
-        this.y + 5,
-        this.width,
-        this.height
+        this.x,
+        this.y + 60,
+        this.width - 50,
+        this.height - 50
       );
     }
   },
@@ -147,12 +176,9 @@ var parent = {
 var baby = {
   x: 0,
   y: canvas.height - 100,
-  width: 40,
-  height: 40,
+  width: 20,
+  height: 20,
   image: babyImg
-  // draw() {
-  //   ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-  // }
 };
 
 // CREATE SCORE - ERROR
@@ -164,40 +190,40 @@ var scoreDiv = {
   flashInterval: null,
   visible: true,
 
-  // scoreZoom() {
-  //   var radiusList = [
-  //     61,
-  //     62,
-  //     63,
-  //     64,
-  //     65,
-  //     66,
-  //     67,
-  //     68,
-  //     69,
-  //     70,
-  //     70,
-  //     69,
-  //     68,
-  //     67,
-  //     66,
-  //     65,
-  //     64,
-  //     63,
-  //     62,
-  //     61,
-  //     60
-  //   ];
-  //   var count = 0;
-  //   zoomInterval = setInterval(function() {
-  //     radius = radiusList[count];
-  //     count++;
+  scoreZoom() {
+    var radiusList = [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      70,
+      69,
+      68,
+      67,
+      66,
+      65,
+      64,
+      63,
+      62,
+      61,
+      60
+    ];
+    var count = 0;
+    zoomInterval = setInterval(function() {
+      radius = radiusList[count];
+      count++;
 
-  //     if (count === radiusList.length) {
-  //       clearInterval(zoomInterval);
-  //     }
-  //   }, 50);
-  // },
+      if (count === radiusList.length) {
+        clearInterval(zoomInterval);
+      }
+    }, 50);
+  },
 
   scoreClick() {
     var count = 0;
@@ -257,8 +283,8 @@ function drawEverything() {
       newWidth,
       canvas.height * 0.7
     );
-    ctx.font = "bold 20px monospace";
-    ctx.fillText("Clik SPACE to restart", canvas.width / 2, 70);
+    ctx.font = "bold 24px Indie Flowers";
+    ctx.fillText("STAY AWAY FROM BABY PLEASE!!!", canvas.width / 2, 70);
     return;
   }
 
@@ -271,8 +297,8 @@ function drawEverything() {
       newWidth,
       canvas.height * 0.7
     );
-    ctx.font = "bold 20px monospace";
-    ctx.fillText("Press SPACE to play again", canvas.width / 2, 70);
+    ctx.font = "bold 24px Indie Flower";
+    ctx.fillText("MAMAN COOL OR DADDY COOL, APPROVED!", canvas.width / 2, 70);
     return;
   }
 
@@ -305,8 +331,22 @@ function drawEverything() {
   iceArray.forEach(oneIceCream => {
     oneIceCream.drawIce();
     if (!oneIceCream.caught && checkCollision(parent, oneIceCream)) {
-      score -= 3;
+      score -= 1;
       oneIceCream.caught = true;
+      parent.parentClick();
+      scoreDiv.scoreClick();
+
+      if (score <= 6) {
+        baby.image = babyAngryImg;
+      }
+    }
+  });
+
+  beerArray.forEach(oneBeerPinte => {
+    oneBeerPinte.drawBeer();
+    if (!oneBeerPinte.caught && checkCollision(parent, oneBeerPinte)) {
+      score -= 3;
+      oneBeerPinte.caught = true;
       parent.parentClick();
       scoreDiv.scoreClick();
 
@@ -367,6 +407,8 @@ function restart() {
   score = 8;
   parent.x = 200;
   parent.y = canvas.height - 100;
+
+  beerArray = [beer];
 
   iceArray = [ice, ice2, ice3];
 
